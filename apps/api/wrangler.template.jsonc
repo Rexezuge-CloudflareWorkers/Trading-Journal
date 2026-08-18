@@ -1,0 +1,49 @@
+{
+  // "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "trading-journal",
+  "main": "apps/api/src/index.ts",
+  "compatibility_date": "2025-11-29",
+  "compatibility_flags": [],
+  "preview_urls": false,
+  "workers_dev": false,
+  "minify": true,
+  "observability": {
+    "logs": {
+      "enabled": true,
+      "head_sampling_rate": 1,
+      "invocation_logs": true,
+      "persist": true,
+    },
+  },
+  "routes": [],
+  "placement": {
+    "mode": "off",
+  },
+  "assets": {
+    "directory": "./apps/web/dist/",
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_id": "00000000-0000-0000-0000-000000000000",
+      "database_name": "trading-journal-db",
+    },
+  ],
+  "r2_buckets": [
+    {
+      "binding": "BACKUP_BUCKET",
+      "bucket_name": "trading-journal-backups",
+    },
+  ],
+  "triggers": {
+    "crons": ["30 1 * * *"],
+  },
+  "vars": {
+    "DEV_AUTH_EMAIL": "",
+    "SERVE_SPA_FROM_WORKER": "true",
+    "BACKUP_RETENTION_DAYS": "30",
+    "BACKUP_TRIGGER_SECRET": "",
+    "POLICY_AUD": "your-cloudflare-zero-trust-application-aud",
+    "TEAM_DOMAIN": "https://your-cloudflare-zero-trust-team-domain.cloudflareaccess.com"
+  }
+}

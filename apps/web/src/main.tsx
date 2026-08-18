@@ -1,0 +1,10 @@
+import { StrictMode } from 'react';
+import { createRoot } from 'react-dom/client';
+import { SpaApp } from './SpaApp';
+import './globals.css';
+
+createRoot(document.getElementById('root')!).render(
+  <StrictMode>
+    <SpaApp />
+  </StrictMode>,
+);
