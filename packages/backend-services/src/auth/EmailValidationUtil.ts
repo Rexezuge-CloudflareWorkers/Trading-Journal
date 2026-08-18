@@ -1,0 +1,52 @@
+import { jwtVerify, createRemoteJWKSet } from 'jose';
+import { UnauthorizedError } from '@trading-journal/backend-errors';
+
+interface EmailValidationEnv {
+  DEV_AUTH_EMAIL?: string;
+  TEAM_DOMAIN?: string;
+  POLICY_AUD?: string;
+}
+
+class EmailValidationUtil {
+  public static async getAuthenticatedUserEmail(request: Request, env: EmailValidationEnv): Promise<string> {
+    const devEmail: string | undefined = env.DEV_AUTH_EMAIL;
+    if (devEmail) {
+      return devEmail;
+    }
+
+    const token: string | null = request.headers.get('cf-access-jwt-assertion');
+    if (!token) {
+      throw new UnauthorizedError('No Cloudflare Access JWT token provided in request headers.');
+    }
+
+    const teamDomain: string | undefined = env.TEAM_DOMAIN;
+    const policyAud: string | undefined = env.POLICY_AUD;
+    if (!teamDomain || !policyAud) {
+      throw new UnauthorizedError('Missing required JWT verification configuration (TEAM_DOMAIN or POLICY_AUD not set).');
+    }
+
+    const normalizedTeamDomain: string = teamDomain.replace(/\/+$/, '');
+    const normalizedPolicyAud: string = policyAud.trim();
+    if (!normalizedPolicyAud) {
+      throw new UnauthorizedError('Empty POLICY_AUD is not allowed.');
+    }
+
+    try {
+      const JWKS = createRemoteJWKSet(new URL(`${normalizedTeamDomain}/cdn-cgi/access/certs`));
+      const { payload } = await jwtVerify(token, JWKS, {
+        issuer: normalizedTeamDomain,
+        audience: normalizedPolicyAud,
+      });
+      const email: unknown = payload.email;
+      if (typeof email !== 'string' || !email) {
+        throw new UnauthorizedError('No email found in JWT token.');
+      }
+      return email;
+    } catch (error) {
+      throw new UnauthorizedError(`JWT verification failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
+}
+
+export { EmailValidationUtil };
+export type { EmailValidationEnv };
