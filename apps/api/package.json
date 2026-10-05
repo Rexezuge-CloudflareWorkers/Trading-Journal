@@ -11,7 +11,7 @@
     "@trading-journal/backend-errors": "workspace:*",
     "@trading-journal/backend-services": "workspace:*",
     "@trading-journal/shared": "workspace:*",
-    "hono": "4.13.1",
+    "hono": "4.13.7",
     "zod": "4.4.3"
   },
   "devDependencies": {
